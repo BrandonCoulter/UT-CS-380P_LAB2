@@ -54,8 +54,6 @@ int main(int argc, char **argv)
 
     if(opts.print_cent)
     {   
-        std::cout << "\n\n" << std::endl;
-
         for(int k = 0; k < opts.n_clusters; k++)
         {
             // clusters[k].print(&opts);

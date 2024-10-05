@@ -1,7 +1,6 @@
 #include <centroid.h>
 
-
-
+// Constructor for a Centroid - Inherits Point
 Centroid::Centroid(struct options_t opts) : Point(opts)
 {
     new_position = (double*)malloc(opts.n_dims * sizeof(double));
@@ -9,6 +8,7 @@ Centroid::Centroid(struct options_t opts) : Point(opts)
     is_cluster = true;
 }
 
+// Overides the Point print method to print extra centroid data
 void Centroid::print(struct options_t* opts)
 {
     std::cout << "Pos: ";
@@ -29,23 +29,27 @@ void Centroid::print(struct options_t* opts)
     return;
 }
 
+// Adds Point dimension data together to later find the mean 
 void Centroid::add_position(Point p, struct options_t* opts)
 {
     for(int d = 0; d < opts->n_dims; d++)
     {
         new_position[d] += p.position[d];
-        // std::cout << "NEW POS[d]: " << new_position[d] << " | POINT POS[d]: " << p.position[d] << std::endl;
     }
     return;
 }
-
+// Finds the mean for each cluster point dimension. 
+// Updates the new position to the average of all the points in that cluster
 void Centroid::find_new_center(struct options_t* opts)
 {
+    // If a cluster is orphaned do not update position
     if(point_count <= 0)
     {
         return;
     }
 
+    // If a cluster has 1 or more points assigned to it
+    // find the mean and set that to the new position for that dimension
     for(int d = 0; d < opts->n_dims; d++)
     {
         new_position[d] = new_position[d] / point_count;
@@ -53,25 +57,23 @@ void Centroid::find_new_center(struct options_t* opts)
     return;
 }
 
+// Check the distance moved by the centroid against a predefined threshold
+// If the distance is less than the threshold then convergance has occured
 bool Centroid::threshold_check(struct options_t* opts)
 {
-    double dis = 1.0;
+    bool converaged = true;
 
+    // For each dimension check the old position vs new position
     for(int d = 0; d < opts->n_dims; d++)
     {
-        dis += (position[d] - new_position[d]) * (position[d] - new_position[d]);
-        position[d] = new_position[d];
-        new_position[d] = 0;
+        // Check if the distance is less than the threshold
+        if(abs(position[d] - new_position[d]) > opts->threshold)
+        {
+            converaged = false; // If any dimension is more than threshold convergance is false
+        }
+        position[d] = new_position[d]; // Update position to new position
+        new_position[d] = 0; // Reset new position for next iteration
     }
     
-    // print(opts);
-
-    if(sqrt(dis) < opts->threshold)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return converaged;
 }

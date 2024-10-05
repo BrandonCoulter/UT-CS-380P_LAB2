@@ -6,14 +6,6 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
     bool converaged = false;
     int iter = opts->max_iter;
 
-    // TEST CODE: REMOVE
-    // struct Point test_point(*opts);
-    // for(int d = 0; d < opts->n_dims; d++){
-    //     test_point.position[d] = 0;
-    // }
-    // test_point.position = points[0].position;
-
-
     // Converagance or max iterations prevent infinite looping
     // Decrease iteration to stop loop incase it doesn't converage
     while(!converaged && iter--)
@@ -60,9 +52,6 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
             clusters[clusterID].point_count += 1;
             clusters[clusterID].add_position(points[p], opts); // Add position to recalculate the mean position after all points assigned
 
-            // std::cout << "POINTS: " << std::endl;
-            // points[p].print(opts);
-
         }
 
         // Iterate the clusters and recompute the centroids
@@ -77,25 +66,7 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
             {
                 converaged = false;
             }
-            // std::cout << "POST-CLUSTER: " << std::endl;
-            // clusters[k].print(opts);
-
         }
-
-        // Recompute Centroids
-
-        // TEST CODE: REMOVE
-        // for(int p = 0; p < opts->n_points; p++)
-        // {
-        //     if(points[p].clusterID == 0){
-        //         points_belonging_to_cluter += 1;
-        //         test_point.add_position(points[p], opts);
-        //     }
-        // }
-        // test_point.find_mean(points_belonging_to_cluter, opts);
-        // test_point.print(opts);
-        // break;
-
     }
 
 #ifdef __PRINT__

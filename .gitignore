@@ -1,0 +1,4 @@
+*.codio
+*.settings
+
+NVIDIA_SDK_Samples/*
