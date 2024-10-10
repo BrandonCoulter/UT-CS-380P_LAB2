@@ -3,7 +3,7 @@
 void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* opts)
 {
 
-    bool converaged = false;
+    bool p_conv, k_conv, converaged = false;
     int iter = opts->max_iter;
 
     // Converagance or max iterations prevent infinite looping
@@ -11,7 +11,7 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
     while(!converaged && iter--)
     {
         // std::cout << iter << std::endl;
-        converaged = true;
+        converaged = p_conv = k_conv = true;
 
         int clusterID = -999;
         // struct Point* new_clusters = (struct Point*) malloc(opts->n_clusters*sizeof(struct Point));
@@ -41,7 +41,7 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
             // If the clusterID is different then set the converaged to false continue loop again
             if (points[p].clusterID != clusterID)
             {
-                converaged = false;
+                p_conv = false;
             }
 
             // Set the clusterID and Reset the Min Distance
@@ -59,18 +59,26 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
         {
             // Check if the distance from the old position to the new position
             // is less than some given threshold t (opts.threshold)
-            clusters[k].find_new_center(opts); // First compute the new centroid
-            clusters[k].point_count = 0;
+            if (!(clusters[k].point_count <= 0))
+            {
+                clusters[k].find_new_center(opts); // First compute the new centroid
+            }
 
             if(!clusters[k].threshold_check(opts))
             {
-                converaged = false;
+                k_conv = false;
             }
+
+            clusters[k].point_count = 0; // Reset point count last
+        }
+        if(!p_conv && !k_conv)
+        {
+            converaged = false;
         }
     }
 
 #ifdef __PRINT__
-    iter += 1; // This is done because the final check of the while loop isn't a loop, it just closes the loop
+    // iter += 1; // This is done because the final check of the while loop isn't a loop, it just closes it
     std::cout << "CONVERGED IN " << opts->max_iter - iter << " LOOPS." << std::endl;
 #endif
 

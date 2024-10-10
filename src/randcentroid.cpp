@@ -18,7 +18,7 @@ struct Centroid* gen_initial_centroid(struct options_t *opts, struct Point* poin
         int index = kmeans_rand() % opts->n_points;
         struct Centroid cluster(*opts);
         cluster.position = points[index].position;
-        cluster.pointID = -1;
+        cluster.pointID = index;
         cluster.clusterID = i;
         cluster.is_cluster = true;
         // you should use the proper implementation of the following

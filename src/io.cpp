@@ -39,7 +39,7 @@ void read_file(struct options_t* opts, struct Point* points)
             }
             else if (d != -1 and d < opts->n_dims)
             {
-                point.position[d] = stold(dim_pos);
+                point.position[d] = stod(dim_pos);
                 // std::cout << " " << stold(dim_pos) << " ";
             }
             else if (d == -1){

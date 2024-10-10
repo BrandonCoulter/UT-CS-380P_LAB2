@@ -14,7 +14,7 @@ Point::Point(struct options_t opts){
 
 double Point::distance(Point p, struct options_t* opts)
 {
-    double dis = 1.0;
+    double dis = 0.0;
 
     for(int d = 0; d < opts->n_dims; d++)
     {

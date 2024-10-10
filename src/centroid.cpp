@@ -48,32 +48,64 @@ void Centroid::find_new_center(struct options_t* opts)
         return;
     }
 
+    double weight = 0.1;
+
     // If a cluster has 1 or more points assigned to it
     // find the mean and set that to the new position for that dimension
     for(int d = 0; d < opts->n_dims; d++)
     {
-        new_position[d] = new_position[d] / point_count;
+        new_position[d] = (weight * position[d]) + ((1 - weight) * (new_position[d] / point_count));
     }
     return;
 }
 
 // Check the distance moved by the centroid against a predefined threshold
 // If the distance is less than the threshold then convergance has occured
+// bool Centroid::threshold_check(struct options_t* opts)
+// {
+//     bool converaged = true;
+
+//     if(point_count <=0)
+//     {
+//         return converaged;
+//     }
+
+//     // For each dimension check the old position vs new position
+//     for(int d = 0; d < opts->n_dims; d++)
+//     {
+//         // Check if the distance is less than the threshold
+//         if(abs(position[d] - new_position[d]) > opts->threshold)
+//         {
+//             converaged = false; // If any dimension is more than threshold convergance is false
+//         }
+//         position[d] = new_position[d]; // Update position to new position
+//         new_position[d] = 0; // Reset new position for next iteration
+//     }
+    
+//     return converaged;
+// }
 bool Centroid::threshold_check(struct options_t* opts)
 {
-    bool converaged = true;
+    double dis = 0.0;
 
-    // For each dimension check the old position vs new position
+    if(point_count <=0)
+    {
+        return true;
+    }
+
     for(int d = 0; d < opts->n_dims; d++)
     {
-        // Check if the distance is less than the threshold
-        if(abs(position[d] - new_position[d]) > opts->threshold)
-        {
-            converaged = false; // If any dimension is more than threshold convergance is false
-        }
+        dis += (new_position[d] - position[d]);
         position[d] = new_position[d]; // Update position to new position
         new_position[d] = 0; // Reset new position for next iteration
     }
     
-    return converaged;
+    if(dis < opts->threshold)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }

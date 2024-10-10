@@ -14,7 +14,7 @@ int main(int argc, char **argv)
     struct options_t opts;
     get_opts(argc, argv, &opts);
 
-    std::cout << std::setprecision(18); // Set the persion of output stream
+    // std::cout << std::setprecision(18); // Set the persion of output stream
 
 #ifdef __PRINT__
     std::cout << "N_CLUSTERS (k): " << opts.n_clusters << std::endl;
@@ -36,6 +36,14 @@ int main(int argc, char **argv)
     // Generate "random" clusters (Sudo random because intial cluster locations can change the output significantly)
     kmeans_srand(opts.seed); // Generate clusters based on cmd passed seed
     struct Centroid* clusters = gen_initial_centroid(&opts, points);
+
+#ifdef __PRINT__
+    std::cout << "Starting centroid points" << std::endl;
+    for(int k = 0; k < opts.n_clusters; k++)
+    {
+        std::cout << "Cluster #" << k << " start index: " << clusters[k].pointID << std::endl;
+    }
+#endif
 
 #if defined(__PRINT__) && defined(__VERBOSE__)
     std::cout << "POINTS: " << std::endl;
@@ -64,6 +72,16 @@ int main(int argc, char **argv)
             }
             std::cout << std::endl;
         }
+    }
+    else
+    {
+        std::cout << "clusters:";
+
+        for(int p = 0; p < opts.n_points; p++)
+        {
+            std::cout << " " << points[p].clusterID;
+        }
+        std::cout << std::endl;
     }
   
     free(points);
