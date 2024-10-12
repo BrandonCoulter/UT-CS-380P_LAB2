@@ -12,15 +12,20 @@ Point::Point(struct options_t opts){
 //     free(position);
 // }
 
-double Point::distance(Point p, struct options_t* opts)
+double Point::squared_distance(double* pos1, double* pos2, struct options_t* opts)
 {
     double dis = 0.0;
 
     for(int d = 0; d < opts->n_dims; d++)
     {
-        dis += (position[d] - p.position[d]) * (position[d] - p.position[d]);
+        dis += (pos1[d] - pos2[d]) * (pos1[d] - pos2[d]);
     }
-    return sqrt(dis);
+    return dis;
+}
+
+double Point::euclidean_distance(double* pos1, double* pos2, struct options_t* opts)
+{
+    return sqrt(squared_distance(pos1, pos2, opts));
 }
 
 void Point::print(struct options_t* opts)

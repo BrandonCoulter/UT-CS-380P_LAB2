@@ -4,8 +4,8 @@
 Centroid::Centroid(struct options_t opts) : Point(opts)
 {
     new_position = (double*)malloc(opts.n_dims * sizeof(double));
+    local_sum_squared_diff = 0.0;
     point_count = 0;
-    is_cluster = true;
 }
 
 // Overides the Point print method to print extra centroid data
@@ -59,51 +59,14 @@ void Centroid::find_new_center(struct options_t* opts)
 
 // Check the distance moved by the centroid against a predefined threshold
 // If the distance is less than the threshold then convergance has occured
-// bool Centroid::threshold_check(struct options_t* opts)
-// {
-//     bool converaged = true;
-
-//     if(point_count <=0)
-//     {
-//         return converaged;
-//     }
-
-//     // For each dimension check the old position vs new position
-//     for(int d = 0; d < opts->n_dims; d++)
-//     {
-//         // Check if the distance is less than the threshold
-//         if(abs(position[d] - new_position[d]) > opts->threshold)
-//         {
-//             converaged = false; // If any dimension is more than threshold convergance is false
-//         }
-//         position[d] = new_position[d]; // Update position to new position
-//         new_position[d] = 0; // Reset new position for next iteration
-//     }
-    
-//     return converaged;
-// }
-bool Centroid::threshold_check(struct options_t* opts)
+void Centroid::iterate_cluster(struct options_t* opts)
 {
-    double dis = 0.0;
-
-    if(point_count <=0)
-    {
-        return true;
-    }
+    local_sum_squared_diff = 0.0; // Reset SSD variable
+    point_count = 0; // Reset point count variable
 
     for(int d = 0; d < opts->n_dims; d++)
     {
-        dis += (new_position[d] - position[d]);
         position[d] = new_position[d]; // Update position to new position
         new_position[d] = 0; // Reset new position for next iteration
-    }
-    
-    if(dis < opts->threshold)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
     }
 }

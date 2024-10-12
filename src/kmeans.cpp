@@ -2,24 +2,28 @@
 
 void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* opts)
 {
-
-    bool p_conv, k_conv, converaged = false;
+    // Initialize kmeans variables
+    bool converaged = false;
     int iter = opts->max_iter;
+    double previous_sum_squared_difference= 0.0;
+    double sum_squared_difference = 0.0;
 
     // Converagance or max iterations prevent infinite looping
     // Decrease iteration to stop loop incase it doesn't converage
-    while(!converaged && iter--)
+    while(!converaged && --iter)
     {
         // std::cout << iter << std::endl;
-        converaged = p_conv = k_conv = true;
+        converaged = true;
 
-        int clusterID = -999;
-        // struct Point* new_clusters = (struct Point*) malloc(opts->n_clusters*sizeof(struct Point));
+        // Update previous SSD and reset SSD
+        previous_sum_squared_difference = sum_squared_difference;
+        sum_squared_difference = 0.0;
 
         // Assign points to clusters (ID) based on euclidean distance
         for(int p = 0; p < opts->n_points; p++)
         {
-
+            int clusterID = -999; // Reset Cluster ID
+        
             // If a point already has a cluster ID associated then assign the checker variable to that ID
             if (points[p].clusterID != -1)
             {
@@ -30,23 +34,19 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
             {
                 // If distance is smaller than the smallest distance, set that to min_distance.
                 // This is the closest cluster and therefore the clusterID for that point is set to the cluster's ID
-                if(points[p].distance(clusters[k], opts) < points[p].min_distance)
+                if(points[p].euclidean_distance(points[p].position, clusters[k].position, opts) < points[p].min_distance)
                 {
-                    points[p].min_distance = points[p].distance(clusters[k], opts);
+                    points[p].min_distance = points[p].euclidean_distance(points[p].position, clusters[k].position, opts);
                     clusterID = clusters[k].clusterID;
                 }
             }
-
-            // If every point did not change clusterIDs then convergance has happened
-            // If the clusterID is different then set the converaged to false continue loop again
-            if (points[p].clusterID != clusterID)
-            {
-                p_conv = false;
-            }
+            // Add each euclidean distance from point to assigned centroid. (WCSS)
+            clusters[clusterID].local_sum_squared_diff += points[p].euclidean_distance(points[p].position, clusters[clusterID].position, opts);
 
             // Set the clusterID and Reset the Min Distance
             points[p].clusterID = clusterID; // Set new clusterID to closest cluster
             points[p].min_distance = __DBL_MAX__; // Reset min_distance for new round 
+
             // Count the number of points belonging to a cluster.
             // This should be reset every iteration //TODO: RESET POINT COUNT
             clusters[clusterID].point_count += 1;
@@ -63,18 +63,26 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
             {
                 clusters[k].find_new_center(opts); // First compute the new centroid
             }
-
-            if(!clusters[k].threshold_check(opts))
+            else
             {
-                k_conv = false;
+                std::cout << "Centroid #" << k << " has no associated points!" << std::endl;
             }
 
-            clusters[k].point_count = 0; // Reset point count last
+            // Caluclate Sum of differences and set new centroid positions
+            sum_squared_difference += clusters[k].local_sum_squared_diff;
+            clusters[k].iterate_cluster(opts);
+
         }
-        if(!p_conv && !k_conv)
+
+        if(abs(sum_squared_difference - previous_sum_squared_difference) > opts->threshold)
         {
             converaged = false;
         }
+
+#ifdef __PRINT__
+        std::cout << "Iteration: " << opts->max_iter - iter << " Inertia = " << abs(sum_squared_difference - previous_sum_squared_difference) << std::endl;
+#endif
+
     }
 
 #ifdef __PRINT__

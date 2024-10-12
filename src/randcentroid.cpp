@@ -20,7 +20,6 @@ struct Centroid* gen_initial_centroid(struct options_t *opts, struct Point* poin
         cluster.position = points[index].position;
         cluster.pointID = index;
         cluster.clusterID = i;
-        cluster.is_cluster = true;
         // you should use the proper implementation of the following
         // code according to your data structure
         // centers[i] = points[index];

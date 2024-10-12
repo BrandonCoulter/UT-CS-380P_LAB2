@@ -14,7 +14,9 @@ struct Point
 
     Point(struct options_t opts);
     // ~Point();
-    double distance(Point p, struct options_t* opts);
+    // double distance(Point p, struct options_t* opts);
+    double squared_distance(double* pos1, double* pos2, struct options_t* opts);
+    double euclidean_distance(double* pos1, double* pos2, struct options_t* opts);
     void print(struct options_t* opts);
 };
 #endif

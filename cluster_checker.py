@@ -46,7 +46,7 @@ def match_centroids(centroids1, centroids2, threshold):
         if matched_to is not None:
             unmatched_centroids2.pop(matched_to)
         elif closest_match is not None:
-            print(f"Found no match for centroid {i}, closest match is centroid {closest_match} with a distance of {closest_match_dis}")
+            print(f"Found no match for centroid {i}, closest match is off by a distance of {closest_match_dis}")
         # else:
         #     print(f"Centroid {i} from file 1 did not match any centroid in file 2 within the threshold.")
 
