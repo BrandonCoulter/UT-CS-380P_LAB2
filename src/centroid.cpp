@@ -48,13 +48,11 @@ void Centroid::find_new_center(struct options_t* opts)
         return;
     }
 
-    double weight = 0.1;
-
     // If a cluster has 1 or more points assigned to it
     // find the mean and set that to the new position for that dimension
     for(int d = 0; d < opts->n_dims; d++)
     {
-        new_position[d] = (weight * position[d]) + ((1 - weight) * (new_position[d] / point_count));
+        new_position[d] = (new_position[d] / point_count);
     }
     return;
 }
