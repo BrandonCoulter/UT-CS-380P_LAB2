@@ -17,7 +17,8 @@ struct Centroid* gen_initial_centroid(struct options_t *opts, struct Point* poin
     for (int i = 0; i < opts->n_clusters; i++){
         int index = kmeans_rand() % opts->n_points;
         struct Centroid cluster(*opts);
-        memcpy(cluster.position, points[index].position, opts->n_dims * sizeof(double));
+        // memcpy(cluster.position, points[index].position, opts->n_dims * sizeof(double));
+        std::copy(points[index].position, points[index].position + opts->n_dims, cluster.position);
         cluster.pointID = index;
         cluster.clusterID = i;
         clusters[i] = cluster;

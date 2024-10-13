@@ -2,6 +2,7 @@
 #define _RANDCENTROID_H
 
 #include <iostream>
+#include <algorithm>
 
 #include <centroid.h>
 #include <argparse.h>
