@@ -52,6 +52,8 @@ def match_centroids(centroids1, centroids2, threshold):
 
     if unmatched_centroids2:
         print(f"Unmatched centroids in file 2: {unmatched_centroids2}")
+    else:
+        print(f"All Centroids matched within the threshold: {threshold}")
 
     return matched
 

@@ -20,13 +20,6 @@ struct Centroid* gen_initial_centroid(struct options_t *opts, struct Point* poin
         memcpy(cluster.position, points[index].position, opts->n_dims * sizeof(double));
         cluster.pointID = index;
         cluster.clusterID = i;
-
-        // std::cout << "Cluster Pos address: " << cluster.position << std::endl;
-        // std::cout << "Point Pos address: " << points[index].position << "\n" << std::endl;
-
-        // you should use the proper implementation of the following
-        // code according to your data structure
-        // centers[i] = points[index];
         clusters[i] = cluster;
     }
 
