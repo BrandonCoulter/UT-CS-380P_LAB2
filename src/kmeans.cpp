@@ -47,7 +47,7 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
             // If any point changed cluster IDs then convergence is false
             if(points[p].clusterID != clusterID)
             {
-#ifdef __PRINT__
+#if defined(__PRINT__) && defined(__VERBOSE__)
                 std::cout << "Point #" << points[p].pointID << " changed clusters IDs from #" << points[p].clusterID << " to Cluster #" << clusterID << std::endl; 
 #endif
                 converaged = false;
@@ -88,7 +88,7 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
             
             if(clusters[k].squared_distance(clusters[k].position, clusters[k].new_position, opts) > opts->threshold)
             {
-#ifdef __PRINT__                
+#if defined(__PRINT__) && defined(__VERBOSE__)       
                 std::cout << "Cluster #" << k << " moved more than the threshold." << std::endl; 
 #endif
                 converaged = false;
@@ -102,7 +102,7 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
             converaged = false;
         }
 
-#ifdef __PRINT__
+#if defined(__PRINT__) && defined(__VERBOSE__)
         std::cout << "Iteration: " << opts->max_iter - iter << " Inertia = " << abs(sum_squared_difference - previous_sum_squared_difference) << "\n" <<std::endl;
 #endif
 
