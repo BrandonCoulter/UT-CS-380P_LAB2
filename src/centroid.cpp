@@ -57,8 +57,7 @@ void Centroid::find_new_center(struct options_t* opts)
     return;
 }
 
-// Check the distance moved by the centroid against a predefined threshold
-// If the distance is less than the threshold then convergance has occured
+// Reset the centroid for the next iteration, set the position to be the new position
 void Centroid::iterate_cluster(struct options_t* opts)
 {
     local_sum_squared_diff = 0.0; // Reset SSD variable

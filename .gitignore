@@ -1,4 +1,5 @@
 *.codio
 *.settings
+.DS_STORE
 
 NVIDIA_SDK_Samples/*

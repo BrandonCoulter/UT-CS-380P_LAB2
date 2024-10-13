@@ -7,11 +7,8 @@ Point::Point(struct options_t opts){
     clusterID = -1;
     min_distance = __DBL_MAX__;
 }
-// Point::~Point()
-// {
-//     free(position);
-// }
 
+// Calculate the squared distance between two points with n dimensions 
 double Point::squared_distance(double* pos1, double* pos2, struct options_t* opts)
 {
     double dis = 0.0;
@@ -23,11 +20,13 @@ double Point::squared_distance(double* pos1, double* pos2, struct options_t* opt
     return dis;
 }
 
+// Calculate the euclidean distance between two points with n dimensions 
 double Point::euclidean_distance(double* pos1, double* pos2, struct options_t* opts)
 {
     return sqrt(squared_distance(pos1, pos2, opts));
 }
 
+// Print point data
 void Point::print(struct options_t* opts)
 {
     std::cout << "Pos: ";
