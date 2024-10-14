@@ -5,8 +5,8 @@
 #include <fstream>
 #include <sstream>
 
-#include <point.h>
-#include <argparse.h>
+#include "point.h"
+#include "argparse.h"
 
 int get_n_points(struct options_t* opts);
 

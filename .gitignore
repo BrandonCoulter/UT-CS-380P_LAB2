@@ -2,4 +2,5 @@
 *.settings
 .DS_STORE
 
+build/*
 NVIDIA_SDK_Samples/*

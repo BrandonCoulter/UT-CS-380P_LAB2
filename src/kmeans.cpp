@@ -1,4 +1,4 @@
-#include <kmeans.h>
+#include "kmeans.h"
 
 void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* opts)
 {

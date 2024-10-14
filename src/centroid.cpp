@@ -1,4 +1,4 @@
-#include <centroid.h>
+#include "centroid.h"
 
 // Constructor for a Centroid - Inherits Point
 Centroid::Centroid(struct options_t opts) : Point(opts)

@@ -3,7 +3,7 @@
 
 #include <math.h>
 
-#include <argparse.h>
+#include "argparse.h"
 
 struct Point
 {

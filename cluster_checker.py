@@ -9,7 +9,7 @@ def read_centroids(file_path):
     Reads centroids from a file. Each line is a centroid, with values separated by spaces.
     """
     with open(file_path, 'r') as file:
-        centroids = [np.array(list(map(float, line.strip().split()[1:]))) for line in file]
+        centroids = [np.array(list(map(float, line.strip().split()[1:]))) for line in file if "time" not in line]
     return centroids
 
 def centroid_within_threshold(centroid1, centroid2, threshold):

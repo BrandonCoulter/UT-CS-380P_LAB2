@@ -1,5 +1,5 @@
 // #include <iostream>
-#include <argparse.h>
+#include "argparse.h"
 
 void get_opts(int argc,
               char **argv,
@@ -13,6 +13,7 @@ void get_opts(int argc,
         std::cout << "\t-m <max_num_iteration>(int)" << std::endl;
         std::cout << "\t-t <threshold>(double)" << std::endl;
         std::cout << "\t-s <seed>(int)" << std::endl;
+        std::cout << "\t[Optional] -T <print_time>(bool)" << std::endl;
         std::cout << "\t[Optional] -c <print_cent>(bool)" << std::endl;
         std::cout << "\t[Optional] --run_cuda <run with cuda basic>(bool)" << std::endl;
         std::cout << "\t[Optional] --run_shmem <run with cuda shmem>(bool)" << std::endl;
@@ -21,6 +22,7 @@ void get_opts(int argc,
     }
 
     opts->print_cent = false;
+    opts->print_time = false;
     opts->run_cuda = false;
     opts->run_shmem = false;
     opts->run_thrust = false;
@@ -33,13 +35,14 @@ void get_opts(int argc,
         {"t", required_argument, NULL, 't'},
         {"s", required_argument, NULL, 's'},
         {"c", no_argument, NULL, 'c'},
+        {"T", no_argument, NULL, 'T'},
         {"run_cuda", no_argument, NULL, 'x'},
         {"run_shmem", no_argument, NULL, 'y'},
         {"run_thrust", no_argument, NULL, 'z'}
     };
 
     int ind, c;
-    while ((c = getopt_long(argc, argv, "k:d:i:m:t:s:cxyz", l_opts, &ind)) != -1)
+    while ((c = getopt_long(argc, argv, "k:d:i:m:t:s:cxyzT", l_opts, &ind)) != -1)
     {
         switch (c)
         {
@@ -65,6 +68,9 @@ void get_opts(int argc,
             break;
         case 'c':
             opts->print_cent = true;
+            break;
+        case 'T':
+            opts->print_time = true;
             break;
         case 'x':
             opts->run_cuda = true;

@@ -1,4 +1,4 @@
-#include <randcentroid.h>
+#include "randcentroid.h"
 
 static unsigned long int next = 1;
 static unsigned long kmeans_rmax = 32767;

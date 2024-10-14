@@ -4,8 +4,8 @@
 #include <iostream>
 #include <algorithm>
 
-#include <centroid.h>
-#include <argparse.h>
+#include "centroid.h"
+#include "argparse.h"
 
 int kmeans_rand();
 

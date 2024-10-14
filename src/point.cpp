@@ -1,4 +1,4 @@
-#include <point.h>
+#include "point.h"
 
 Point::Point(struct options_t opts){
     // std::cout << "Created a point" << std::endl;

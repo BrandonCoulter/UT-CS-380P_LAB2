@@ -1,7 +1,7 @@
 #ifndef _CENTROID_H
 #define _CENTROID_H
 
-#include <point.h>
+#include "point.h"
 
 
 struct Centroid : Point

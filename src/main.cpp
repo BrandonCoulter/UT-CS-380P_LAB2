@@ -1,12 +1,14 @@
 // #include <iostream>
 #include <iomanip>
-
 #include <io.h>
-#include <kmeans.h>
-#include <point.h>
-#include <centroid.h>
-#include <argparse.h>
-#include <randcentroid.h>
+#include <chrono>
+
+#include "kmeans.h"
+#include "point.h"
+#include "centroid.h"
+#include "argparse.h"
+#include "randcentroid.h"
+#include "kmeans_cuda_basic.h"
 
 int main(int argc, char **argv)
 {
@@ -57,8 +59,23 @@ int main(int argc, char **argv)
         clusters[k].print(&opts);
     }
 #endif
+    // Start timer
+    auto start = std::chrono::high_resolution_clock::now();
 
     kmeans(clusters, points, &opts);
+
+    //End timer and print out elapsed
+    auto end = std::chrono::high_resolution_clock::now();
+    auto diff = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+    if(opts.run_cuda)
+    {
+        std::cout << "time: " << diff.count() << " | " << clusters[0].pointID << " + "<< clusters[1].pointID << " = " << cuda_kmeans(clusters, points, &opts) << std::endl;
+    }
+    else
+    {
+        std::cout << "time: " << diff.count() << std::endl;
+    }
 
     if(opts.print_cent)
     {   

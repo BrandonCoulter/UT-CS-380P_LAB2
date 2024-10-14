@@ -15,6 +15,7 @@ struct options_t {
     double threshold;
     bool print_cent;
     int seed;
+    bool print_time;
     bool run_cuda;
     bool run_shmem;
     bool run_thrust;
