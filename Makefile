@@ -4,7 +4,7 @@ BIN_DIR := ./bin
 BUILD_DIR := ./build
 INC_DIR := ./src
 
-# Create necessary directories if they don't exist
+# Create directories if they don't exist already
 $(shell mkdir -p $(BIN_DIR) $(BUILD_DIR))
 
 # Executable file name

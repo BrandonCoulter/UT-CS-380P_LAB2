@@ -3,17 +3,17 @@
 void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* opts)
 {
     // Initialize kmeans variables
-    bool converaged = false;
+    bool converged = false;
     int iter = opts->max_iter;
     double previous_sum_squared_difference= 0.0;
     double sum_squared_difference = 0.0;
 
     // Converagance or max iterations prevent infinite looping
     // Decrease iteration to stop loop incase it doesn't converage
-    while(!converaged && --iter)
+    while(!converged && --iter)
     {
         // std::cout << iter << std::endl;
-        converaged = true;
+        converged = true;
 
         // Update previous SSD and reset SSD
         previous_sum_squared_difference = sum_squared_difference;
@@ -50,7 +50,7 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
 #if defined(__PRINT__) && defined(__VERBOSE__)
                 std::cout << "Point #" << points[p].pointID << " changed clusters IDs from #" << points[p].clusterID << " to Cluster #" << clusterID << std::endl; 
 #endif
-                converaged = false;
+                converged = false;
             }
             
             
@@ -86,20 +86,22 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
             // Caluclate Sum of differences and set new centroid positions
             sum_squared_difference += clusters[k].local_sum_squared_diff;
             
-            if(clusters[k].squared_distance(clusters[k].position, clusters[k].new_position, opts) > opts->threshold)
-            {
-#if defined(__PRINT__) && defined(__VERBOSE__)       
-                std::cout << "Cluster #" << k << " moved more than the threshold." << std::endl; 
-#endif
-                converaged = false;
-            }
+
+            // TODO Coulter - This seems to be unneeded. It neither reduces or adds to iteration or correctness
+//             if(clusters[k].squared_distance(clusters[k].position, clusters[k].new_position, opts) > opts->threshold)
+//             {
+// #if defined(__PRINT__) && defined(__VERBOSE__)       
+//                 std::cout << "Cluster #" << k << " moved more than the threshold." << std::endl; 
+// #endif
+//                 converged = false;
+//             }
             clusters[k].iterate_cluster(opts);
 
         }
 
         if(abs(sum_squared_difference - previous_sum_squared_difference) > opts->threshold)
         {
-            converaged = false;
+            converged = false;
         }
 
 #if defined(__PRINT__) && defined(__VERBOSE__)
@@ -108,9 +110,8 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
 
     }
 
-#ifdef __PRINT__
     // iter += 1; // This is done because the final check of the while loop isn't a loop, it just closes it
-    std::cout << "CONVERGED IN " << opts->max_iter - iter << " LOOPS." << std::endl;
-#endif
+    printf("Converged in %d | ", opts->max_iter - iter);
+    // std::cout << "CONVERGED IN " << opts->max_iter - iter << " LOOPS." << std::endl;
 
 }
