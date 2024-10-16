@@ -6,27 +6,11 @@ Centroid::Centroid(struct options_t opts) : Point(opts)
     new_position = (double*)malloc(opts.n_dims * sizeof(double));
     local_sum_squared_diff = 0.0;
     point_count = 0;
-}
 
-// Overides the Point print method to print extra centroid data
-void Centroid::print(struct options_t* opts)
-{
-    std::cout << "Pos: ";
-    for(int d = 0; d < opts->n_dims; d++)
+    for(int d = 0; d < opts.n_dims; d++)
     {
-        std::cout << " " << position[d] << ", ";
+        new_position[d] = 0;
     }
-    std::cout << "\nNew Pos: ";
-    for(int d = 0; d < opts->n_dims; d++)
-    {
-        std::cout << " " << new_position[d] << ", ";
-    }
-    std::cout << "\nPID: " << pointID << std::endl;
-    std::cout << "CID: " << clusterID << std::endl;
-    std::cout << "Min_Dis: " << min_distance << std::endl;
-    std::cout << "P_Count: " << point_count << std::endl;
-
-    return;
 }
 
 // Adds Point dimension data together to later find the mean 
@@ -68,4 +52,26 @@ void Centroid::iterate_cluster(struct options_t* opts)
         position[d] = new_position[d]; // Update position to new position
         new_position[d] = 0; // Reset new position for next iteration
     }
+}
+
+// Overides the Point print method to print extra centroid data
+void Centroid::print(struct options_t* opts)
+{
+    printf("Pos: ");
+    for(int d = 0; d < opts->n_dims; d++)
+    {
+        printf(" %f, ", position[d]);
+    }
+    printf("\nNew Pos: ");
+    for(int d = 0; d < opts->n_dims; d++)
+    {
+        printf(" %f, ", new_position[d]);
+    }
+    printf("\nPID: %d\n", pointID);
+    printf("CID: %d\n", clusterID);
+    printf("Min_Dis: %e\n", min_distance);
+    printf("P_Count: %d\n", point_count);
+    printf("L_SSD: %f\n", local_sum_squared_diff);
+
+    return;
 }

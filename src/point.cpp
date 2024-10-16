@@ -29,14 +29,15 @@ double Point::euclidean_distance(double* pos1, double* pos2, struct options_t* o
 // Print point data
 void Point::print(struct options_t* opts)
 {
-    std::cout << "Pos: ";
+    printf("Pos: ");
     for(int d = 0; d < opts->n_dims; d++)
     {
-        std::cout << " " << position[d] << ", ";
+        printf(" %f, ", position[d]);
     }
-    std::cout << "\nPID: " << pointID << std::endl;
-    std::cout << "CID: " << clusterID << std::endl;
-    std::cout << "Min_Dis: " << min_distance << std::endl;
+
+    printf("\nPID: %d\n", pointID);
+    printf("CID: %d\n", clusterID);
+    printf("Min_Dis: %e\n", min_distance);
 
     return;
 }

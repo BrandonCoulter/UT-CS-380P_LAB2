@@ -1,5 +1,5 @@
-alias cc='clear;'
-alias m='make all;'
+alias cc='clear'
+alias m='make all'
 alias mp='make print'
 # Git Commands
 alias gits='git status'

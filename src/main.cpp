@@ -9,6 +9,7 @@
 #include "argparse.h"
 #include "randcentroid.h"
 #include "kmeans_cuda_basic.h"
+#include "kmeans_cuda_shmem.h"
 
 int main(int argc, char **argv)
 {
@@ -64,12 +65,13 @@ int main(int argc, char **argv)
 
     if(opts.run_cuda)
     {
-        cuda_kmeans(clusters, points, &opts);
+        cuda_basic::cuda_kmeans(clusters, points, &opts);
         printf("%s, ", "Cuda Basic");
     }
     else if(opts.run_shmem)
     {
-        //TODO: Add shared memory implementation
+        cuda_shmem::cuda_kmeans(clusters, points, &opts);
+        printf("%s, ", "Cuda SHMEM");
     }
     else if(opts.run_thrust)
     {

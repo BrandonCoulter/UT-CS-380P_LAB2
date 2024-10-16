@@ -26,14 +26,20 @@ OPT_FLAGS := -O3
 CXXFLAGS := -I$(INC_DIR) $(OPT_FLAGS) -Xcompiler -Wall 
 
 # Flags for CUDA code (device code)
-CUFLAGS := -arch=sm_75 $(OPT_FLAGS)
+CUARCH := -arch=sm_75
+CUFLAGS := $(CUARCH) $(OPT_FLAGS)
 
 # Target to build the executable
 all: $(EXE)
 
+# Target to build the executable with print support
+print: CXXFLAGS := -I$(INC_DIR) $(OPT_FLAGS) -D__PRINT__ -Xcompiler -Wall 
+print: CUFLAGS := $(CUARCH) $(OPT_FLAGS) -D__PRINT__
+print: $(EXE)
+
 # Rule to create the executable (linking object files from build directory)
 $(EXE): $(OBJ)
-	$(NVCC) -o $@ $^
+	$(NVCC) $(CUARCH) -o $@ $^
 
 # Rule to compile .cpp files to .o in build directory
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
