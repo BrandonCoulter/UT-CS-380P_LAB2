@@ -22,7 +22,6 @@ void read_file(struct options_t* opts, struct Point* points)
     std::string dim_pos;
     getline(in, line); // Drop the first line which corresponds to num points
 
-    // std::cout << "IO N_POINTS: " << opts->n_points << std::endl;
     for(int i = 0; i < opts->n_points; ++i)
     {
         getline(in, line);
@@ -40,7 +39,6 @@ void read_file(struct options_t* opts, struct Point* points)
             else if (d != -1 and d < opts->n_dims)
             {
                 point.position[d] = stod(dim_pos);
-                // std::cout << " " << stold(dim_pos) << " ";
             }
             else if (d == -1){
                 point.pointID = stoi(dim_pos);
@@ -48,29 +46,8 @@ void read_file(struct options_t* opts, struct Point* points)
 
             d++;
         }
-        // point.print(opts);
+
         points[i] = point;
-        // std::cout << std::endl;
     }
-    // std::cout << std::endl;
     in.close();
 }
-
-// void write_file(struct options_t*         args,
-//                	struct prefix_sum_args_t* opts) {
-//   // Open file
-// 	std::ofstream out;
-// 	out.open(args->out_file, std::ofstream::trunc);
-
-// 	// Write solution to output file
-// 	for (int i = 0; i < opts->n_vals; ++i) {
-// 		out << opts->output_vals[i] << std::endl;
-// 	}
-
-// 	out.flush();
-// 	out.close();
-	
-// 	// Free memory
-// 	free(opts->input_vals);
-// 	free(opts->output_vals);
-// }

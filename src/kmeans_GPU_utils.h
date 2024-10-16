@@ -18,4 +18,41 @@ inline __device__ void squared_distance(double* c_pos, double* p_pos, double* di
     }
 }
 
+struct CudaTimer
+{
+    cudaEvent_t start_event;
+    cudaEvent_t stop_event;
+
+    inline CudaTimer()
+    {
+        cudaEventCreate(&start_event);
+        cudaEventCreate(&stop_event);
+    }
+    inline ~CudaTimer()
+    {
+        cudaEventDestroy(start_event);
+        cudaEventDestroy(stop_event);
+    }
+
+    inline void start()
+    {
+        cudaEventRecord(start_event);
+    }
+    inline void stop()
+    {
+        cudaEventRecord(stop_event);
+    }
+    inline float get_elapsed_time()
+    {
+        cudaEventSynchronize(stop_event);
+
+        float milliseconds = 0;
+        cudaEventElapsedTime(&milliseconds, start_event, stop_event);
+
+        return milliseconds;
+        
+    }
+
+};
+
 #endif

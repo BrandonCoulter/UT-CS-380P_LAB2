@@ -46,7 +46,7 @@ for input in INPUTS:
 
         with open("out.txt", "r") as out:
             time = out.readline()
-            if "time" in time:
+            if "Time" in time:
                 print(time.strip())
             out.close()
 

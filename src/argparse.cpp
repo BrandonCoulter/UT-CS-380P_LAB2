@@ -7,17 +7,17 @@ void get_opts(int argc,
 {
     if (argc == 1)
     {
-        std::cout << "Usage:" << std::endl;
-        std::cout << "\t-d <num_dimensions>(int)" << std::endl;
-        std::cout << "\t-i <input_file_path>(*char)" << std::endl;
-        std::cout << "\t-m <max_num_iteration>(int)" << std::endl;
-        std::cout << "\t-t <threshold>(double)" << std::endl;
-        std::cout << "\t-s <seed>(int)" << std::endl;
-        std::cout << "\t[Optional] -T <print_time>(bool)" << std::endl;
-        std::cout << "\t[Optional] -c <print_cent>(bool)" << std::endl;
-        std::cout << "\t[Optional] --run_cuda <run with cuda basic>(bool)" << std::endl;
-        std::cout << "\t[Optional] --run_shmem <run with cuda shmem>(bool)" << std::endl;
-        std::cout << "\t[Optional] --run_thrust <run with thrust>(bool)" << std::endl;
+        printf("Usage:\n");
+        printf("\t-d <num_dimensions>(int)\n");
+        printf("\t-i <input_file_path>(*char)\n");
+        printf("\t-m <max_num_iteration>(int)\n");
+        printf("\t-t <threshold>(double)\n");
+        printf("\t-s <seed>(int)\n");
+        printf("\t[Optional] -T <print_time>(bool)\n");
+        printf("\t[Optional] -c <print_cent>(bool)\n");
+        printf("\t[Optional] --run_cuda <run with cuda basic>(bool)\n");
+        printf("\t[Optional] --run_shmem <run with cuda shmem>(bool)\n");
+        printf("\t[Optional] --run_thrust <run with thrust>(bool)\n");
         exit(0);
     }
 

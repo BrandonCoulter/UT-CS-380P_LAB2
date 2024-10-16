@@ -1,7 +1,6 @@
 #include "point.h"
 
 Point::Point(struct options_t opts){
-    // std::cout << "Created a point" << std::endl;
     position = (double*)malloc(opts.n_dims * sizeof(double));
     pointID = -1;
     clusterID = -1;

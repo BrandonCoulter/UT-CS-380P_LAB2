@@ -95,6 +95,16 @@ __global__ void cuda_basic::reset_centroids(struct Centroid* clusters, struct op
 }
 
 void cuda_basic::cuda_kmeans(struct Centroid* clusters, struct Point* points, struct options_t* opts) {
+
+    // Create a Cuda event based timer object for total elapsed time and iteration time
+    CudaTimer timer;
+    CudaTimer iter_timer;
+    //float total_elapsed_time = 0;
+    float average_iteration_time = 0;
+
+    // Start Total Timer
+    timer.start();
+
     struct Centroid* d_clusters; // Device copy of clusters
     struct Point* d_points; // Device copy of points
     
@@ -107,7 +117,7 @@ void cuda_basic::cuda_kmeans(struct Centroid* clusters, struct Point* points, st
     cudaMemcpy(d_points, points, opts->n_points * sizeof(struct Point), cudaMemcpyHostToDevice);
     
     // Select grid and block size
-    int threads_per_block = 128;
+    int threads_per_block = 1024;
     int blocks_per_grid = (opts->n_points + threads_per_block - 1) / threads_per_block;
     
     // Initialize kmeans control variables
@@ -117,6 +127,8 @@ void cuda_basic::cuda_kmeans(struct Centroid* clusters, struct Point* points, st
     double sum_squared_difference = 0.0;
     
     while(!converged && iter--) {
+
+        iter_timer.start();
 
         //printf("\n\nIteration %d\n", opts->max_iter - iter);
         
@@ -166,6 +178,9 @@ void cuda_basic::cuda_kmeans(struct Centroid* clusters, struct Point* points, st
         //CUDA_CHECK_ERROR();
         cudaDeviceSynchronize(); // Make sure that all kernals are completed
 
+        iter_timer.stop();
+        average_iteration_time += iter_timer.get_elapsed_time();
+
 #ifdef __PRINT__
 
         // DEBUG PRINTING
@@ -188,8 +203,11 @@ void cuda_basic::cuda_kmeans(struct Centroid* clusters, struct Point* points, st
 #endif
         
     }
+    timer.stop();
 
-    printf("converged in %d | ", opts->max_iter - iter);
+    average_iteration_time /= (opts->max_iter - iter);
+
+    printf("Converged in %d | Total Time: %f | Avg Iter Time: %f | ", opts->max_iter - iter, timer.get_elapsed_time(), average_iteration_time);
     
     // Free device memory
     cudaFree(d_clusters);

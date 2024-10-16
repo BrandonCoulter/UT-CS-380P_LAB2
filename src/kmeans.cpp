@@ -2,6 +2,12 @@
 
 void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* opts)
 {
+    // Timer metric variables
+    double total_time = 0;
+    double average_iteration_time = 0;
+    // Start total sequential timer
+    auto total_start = std::chrono::high_resolution_clock::now();
+
     // Initialize kmeans variables
     bool converged = false;
     int iter = opts->max_iter;
@@ -12,7 +18,7 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
     // Decrease iteration to stop loop incase it doesn't converage
     while(!converged && --iter)
     {
-        // std::cout << iter << std::endl;
+
         converged = true;
 
         // Update previous SSD and reset SSD
@@ -35,7 +41,6 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
                 // If distance is smaller than the smallest distance, set that to min_distance.
                 // This is the closest cluster and therefore the associated clusterID for that point is set to the cluster's ID
                 double distance = points[p].euclidean_distance(points[p].position, clusters[k].position, opts);
-                // std::cout << "Distance: " << distance << std::endl;
                 if(distance < points[p].min_distance)
                 {
                     points[p].min_distance = distance;
@@ -48,7 +53,7 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
             if(points[p].clusterID != clusterID)
             {
 #if defined(__PRINT__) && defined(__VERBOSE__)
-                std::cout << "Point #" << points[p].pointID << " changed clusters IDs from #" << points[p].clusterID << " to Cluster #" << clusterID << std::endl; 
+                printf("Point # %d changed cluster IDs from #%d to Cluster #%d\n", points[p].pointID, points[p].clusterID, clusterID);
 #endif
                 converged = false;
             }
@@ -78,23 +83,10 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
             {
                 clusters[k].find_new_center(opts); // First compute the new centroid
             }
-            else
-            {
-                std::cout << "Centroid #" << k << " has no associated points!" << std::endl;
-            }
 
             // Caluclate Sum of differences and set new centroid positions
             sum_squared_difference += clusters[k].local_sum_squared_diff;
             
-
-            // TODO Coulter - This seems to be unneeded. It neither reduces or adds to iteration or correctness
-//             if(clusters[k].squared_distance(clusters[k].position, clusters[k].new_position, opts) > opts->threshold)
-//             {
-// #if defined(__PRINT__) && defined(__VERBOSE__)       
-//                 std::cout << "Cluster #" << k << " moved more than the threshold." << std::endl; 
-// #endif
-//                 converged = false;
-//             }
             clusters[k].iterate_cluster(opts);
 
         }
@@ -105,13 +97,18 @@ void kmeans(struct Centroid* clusters, struct Point* points, struct options_t* o
         }
 
 #if defined(__PRINT__) && defined(__VERBOSE__)
-        std::cout << "Iteration: " << opts->max_iter - iter << " Inertia = " << abs(sum_squared_difference - previous_sum_squared_difference) << "\n" <<std::endl;
+        printf("Iteration %d Inertia = %e\n", opts->max_iter - iter, abs(sum_squared_difference - previous_sum_squared_difference));
 #endif
 
     }
 
-    // iter += 1; // This is done because the final check of the while loop isn't a loop, it just closes it
-    printf("Converged in %d | ", opts->max_iter - iter);
-    // std::cout << "CONVERGED IN " << opts->max_iter - iter << " LOOPS." << std::endl;
+    //End timer and print out elapsed
+    auto total_end = std::chrono::high_resolution_clock::now();
+    auto total_time_clock = std::chrono::duration_cast<std::chrono::milliseconds>(total_end - total_start);
+
+    total_time = total_time_clock.count();
+    average_iteration_time = total_time / (opts->max_iter - iter);
+
+    printf("Converged in %d | Total Time: %f | Avg Iter Time: %f | ", opts->max_iter - iter, total_time, average_iteration_time);
 
 }
