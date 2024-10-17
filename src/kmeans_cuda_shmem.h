@@ -15,6 +15,7 @@
 namespace cuda_shmem
 {
     __global__ void assign_points_to_clusters(struct Centroid* clusters, struct Point* points, struct options_t* opts, int* converged);
+    __global__ void calculate_centroid(struct Centroid* clusters, struct Point* points, struct options_t* opts, double* SSD);
 
     void cuda_kmeans(struct Centroid* clusters, struct Point* points, struct options_t* opts);
 }

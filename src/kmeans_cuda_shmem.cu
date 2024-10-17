@@ -1,94 +1,138 @@
 #include "kmeans_cuda_shmem.h"
 
-__device__ void add_new_centroid_position(double* shared_cluster_positions, double* point_position, int n_dims)
+/*********************\
+ DEVICE ONLY FUNCTIONS
+\*********************/
+
+__device__ void add_new_centroid_position(double* cluster_position, double* point_position, int n_dims)
 {
     for(int d = 0; d < n_dims; d++)
     {
-        atomicAdd(&shared_cluster_positions[d], point_position[d]);
+        atomicAdd(&cluster_position[d], point_position[d]);
     }
 };
 
-__device__ void find_new_centroid_position(double* shared_cluster_positions, int point_count, int n_dims)
+__device__ void find_new_centroid_position(double* cluster_position, int point_count, int n_dims)
 {
     for(int d = 0; d < n_dims; d++)
     {
-        shared_cluster_positions[d] = shared_cluster_positions[d] / point_count;
+        cluster_position[d] = cluster_position[d] / point_count;
+
     }
 };
+
+
 
 __global__ void cuda_shmem::assign_points_to_clusters(struct Centroid* clusters, struct Point* points, struct options_t* opts, int* converged)
 {
     extern __shared__ struct Centroid shared_clusters[];
 
-    int gindex = threadIdx.x + blockIdx.x * blockDim.x; // Calculate the index assigned to the specific thread
-    int lindex = threadIdx.x; 
+    int gindex = threadIdx.x + blockIdx.x * blockDim.x; // index of the point to be processed
+    int lindex = threadIdx.x; // Index of the cluster in shared memory
 
     if(lindex < opts->n_clusters)
     {
-        shared_clusters[threadIdx.x] = clusters[threadIdx.x];
+        shared_clusters[lindex] = clusters[lindex];
     }
 
-    __syncthreads(); // Synchronize threads after loading shared memory
+    __syncthreads(); // Sync all threads in the block after loading shared memory
 
-    int newClusterID = -999;
-
-    if (gindex < opts->n_points)
+    if(gindex < opts->n_points)
     {
-        // Declare variables for assignment tracking
-        double dis, e_dis, min_squared_dis;
-        int originalClusterID = points[gindex].clusterID; // Store the original ClusterID for the assigned centroid
-        newClusterID = originalClusterID; // New ClusterID to be updated with closest centroid
-        points[gindex].min_distance = DBL_MAX; // Reset the min distance before cluster checking iteration
+        // Declare local variables for cluster assignment
+        int new_cluster_id = -999;
+        double min_s_distance = 0.0;
+        double min_e_distance = DBL_MAX;
+        double s_distance; // Local sum of squared difference from the point to the selected cluster
+        double e_distance; // Euclidean distance from the point to the selected cluster
 
-        // Iterate each cluster and find the closest one based on euclidean_distance
-        for (int k = 0; k < opts->n_clusters; k++) {
-            dis = 0.0; // Reset distance
-            e_dis = 0.0; // Reset euclidean distance
+        // Iterate clusters in shared memory to find the closest one
+        for(int k = 0; k < opts->n_clusters; k++)
+        {
+            // Get the squared distance from point to shared memory cluster
+            s_distance = 0.0;
+            squared_distance(shared_clusters[k].position, points[gindex].position, &s_distance, opts->n_dims);
 
-            // Iterate dimensions and calculate sum of squared differences
-            squared_distance(shared_clusters[k].position, points[gindex].position, &dis, opts->n_dims);
-
-            // Check if distance from point to cluster k is smaller than the min_distance
-            e_dis = sqrt(dis); // Set euclidean distance
-            if (e_dis < points[gindex].min_distance) {
-                points[gindex].min_distance = e_dis; // Set min_distance to euclidean_distance from point to centroid
-                newClusterID = k;                    // Set the new cluster ID
-                min_squared_dis = dis;
+            // Get euclidean distance and check against min distance
+            e_distance = sqrt(s_distance);
+            if(e_distance < min_e_distance)
+            {
+                min_e_distance = e_distance;
+                min_s_distance = s_distance;
+                new_cluster_id = k;
             }
+
         }
 
-        // If the cluster ID has changed, mark the point as moved
-        if (originalClusterID != newClusterID) {
-            // Update the cluster ID for the point
-            points[gindex].clusterID = newClusterID;
-            // Mark that the clusters haven't converged yet
+        // Write the new positions to global memory
+        add_new_centroid_position(clusters[new_cluster_id].new_position, points[gindex].position, opts->n_dims);
+
+        // Add the sum of squared differences from point to cluster back into the global cluster sum of squared differences
+        atomicAdd(&clusters[new_cluster_id].local_sum_squared_diff, min_s_distance);
+
+        // Add 1 to the point count of the assigned global cluster
+        atomicAdd(&clusters[new_cluster_id].point_count, 1);
+
+
+        // Check point cluster assignment change and set convergence false
+        if(points[gindex].clusterID != new_cluster_id)
+        {
+            points[gindex].clusterID = new_cluster_id; // Set the new cluster assignment
             atomicCAS(converged, 1, 0);
         }
 
-        // Accumulate cluster stats
-        atomicAdd(&shared_clusters[newClusterID].local_sum_squared_diff, min_squared_dis);
-        atomicAdd(&shared_clusters[newClusterID].point_count, 1);
-        add_new_centroid_position(shared_clusters[newClusterID].new_position, points[gindex].position, opts->n_dims);
-
-
     }
 
-    __syncthreads(); // Synchronize threads before loading global memory
+}
+
+
+
+__global__ void cuda_shmem::calculate_centroid(struct Centroid* clusters, struct Point* points, struct options_t* opts, double* SSD)
+{
+    extern __shared__ struct Centroid shared_clusters[];
+
+    int gindex = threadIdx.x + blockIdx.x * blockDim.x; // index of the point to be processed
+    int lindex = threadIdx.x; // Index of the cluster in shared memory
 
     if(lindex < opts->n_clusters)
     {
-        // Atomically write local block shared memory back to global memory
-        atomicAdd(&clusters[threadIdx.x].point_count, shared_clusters[threadIdx.x].point_count);
-        atomicAdd(&clusters[threadIdx.x].local_sum_squared_diff, shared_clusters[threadIdx.x].local_sum_squared_diff);
+        shared_clusters[lindex] = clusters[lindex];
     }
-    
-    __syncthreads();
 
-    return;
+    __syncthreads(); // Sync all threads in the block after loading shared memory
+
+    if(gindex < opts->n_clusters)
+    {
+        find_new_centroid_position(shared_clusters[gindex].new_position, shared_clusters[gindex].point_count, opts->n_dims);
+
+        for(int d = 0; d < opts->n_dims; d++)
+        {
+            clusters[gindex].position[d] = shared_clusters[gindex].new_position[d];
+            clusters[gindex].new_position[d] = 0.0;
+        }
+
+        atomicAdd(SSD, shared_clusters[gindex].local_sum_squared_diff);
+
+        clusters[gindex].local_sum_squared_diff = 0.0; // Reset the local SSD
+        clusters[gindex].point_count = 0; // Reset the point count
+    }
+
 }
+
+
 
 void cuda_shmem::cuda_kmeans(struct Centroid* clusters, struct Point* points, struct options_t* opts)
 {
+
+    // Create a Cuda event based timer object for total elapsed time and iteration time
+    CudaTimer timer;
+    CudaTimer iter_timer;
+    //float total_elapsed_time = 0;
+    float average_iteration_time = 0;
+
+    // Start Total Timer
+    timer.start();
+
     struct Centroid* d_clusters; // Device copy of clusters
     struct Point* d_points; // Device copy of points
     
@@ -115,7 +159,7 @@ void cuda_shmem::cuda_kmeans(struct Centroid* clusters, struct Point* points, st
     
     while(!converged && iter--) {
 
-        //printf("\n\nIteration %d\n", opts->max_iter - iter);
+        iter_timer.start();
         
         // Set the convergence variable to true, if all conditions met, the loop will closes
         converged = 1;
@@ -130,21 +174,23 @@ void cuda_shmem::cuda_kmeans(struct Centroid* clusters, struct Point* points, st
 
         cudaDeviceSynchronize(); // Make sure that all kernals are completed
         
-        // Add position of point to cluster
-        //add_new_centroid_position<<<blocks_per_grid, threads_per_block, cluster_shmem_size>>>(d_clusters, d_points, opts);
-        //CUDA_CHECK_ERROR();
+        // Calculate the new centroid position and reset for next iteration
+        calculate_centroid<<<1, opts->n_clusters, cluster_shmem_size>>>(d_clusters, d_points, opts, &sum_squared_difference);
+        CUDA_CHECK_ERROR();
 
-        //cudaDeviceSynchronize(); // Make sure that all kernals are completed
-
-
+        cudaDeviceSynchronize(); // Make sure that all kernals are completed
 
         // Copy device to host memory for clusters and points
         cudaMemcpy(clusters, d_clusters, opts->n_clusters * sizeof(struct Centroid), cudaMemcpyDeviceToHost);
         cudaMemcpy(points, d_points, opts->n_points * sizeof(struct Point), cudaMemcpyDeviceToHost);
 
+        if(abs(sum_squared_difference - previous_sum_squared_difference) > opts->threshold)
+        {
+            converged = 0; // set convergence to false
+        }
 
-
-
+        iter_timer.stop();
+        average_iteration_time += iter_timer.get_elapsed_time();
 
 #ifdef __PRINT__
 
@@ -173,8 +219,11 @@ void cuda_shmem::cuda_kmeans(struct Centroid* clusters, struct Point* points, st
 #endif
     }
     
+    timer.stop();
 
-    printf("converged in %d | ", opts->max_iter - iter);
+    average_iteration_time /= (opts->max_iter - iter);
+
+    printf("Converged in %d | Total Time: %f | Avg Iter Time: %f | ", opts->max_iter - iter, timer.get_elapsed_time(), average_iteration_time);
 
     // Free device memory
     cudaFree(d_clusters);
